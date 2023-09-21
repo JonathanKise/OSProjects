@@ -1,0 +1,18 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+    
+       {
+            "type": "java",
+            "name": "Machine",
+            "request": "launch",
+            "mainClass": "nachos.machine.Machine",
+            "projectName": "Project1_36994437",
+            "cwd": "${workspaceRoot}/src/nachos/proj1"
+          // "program": "${workspace_loc:PROJECT1/src/nachos/proj1}
+        }
+    ]
+}
