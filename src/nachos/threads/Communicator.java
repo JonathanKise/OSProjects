@@ -1,6 +1,8 @@
 package nachos.threads;
 
+import java.util.concurrent.locks.ReentrantLock; 
 import nachos.machine.*;
+
 
 /**
  * A <i>communicator</i> allows threads to synchronously exchange 32-bit
@@ -10,10 +12,21 @@ import nachos.machine.*;
  * threads can be paired off at this point.
  */
 public class Communicator {
+   
+
+   Lock mailCall = new Lock();
+  
+   Condition condition = new Condition(mailCall);
+ static boolean Speakercalledfirst = false;
+ static  boolean listencalledfirst = false;
+   //mailCall.acquire;
+   //mailCall.release;
     /**
      * Allocate a new communicator.
-     */
+     
     public Communicator() {
+    //
+    condition.wake();
     }
 
     /**
@@ -26,16 +39,56 @@ public class Communicator {
      *
      * @param	word	the integer to transfer.
      */
+int text = -1;
     public void speak(int word) {
+       
+    if(!Speakercalledfirst){
+              text = word;
+       mailCall.acquire();
+        
+try {
+
+    System.out.println("IN SPEAK TRY");
+    Speakercalledfirst = true;
+    if(!listencalledfirst){condition.sleep();}
+    else{condition.wake();}
+   
+
+    //PUT THE WAIT IN HERE
+     
+} finally {
+   listencalledfirst = false;
+    mailCall.release();
+    
+}
     }
+   }
 
     /**
      * Wait for a thread to speak through this communicator, and then return
      * the <i>word</i> that thread passed to <tt>speak()</tt>.
      *
      * @return	the integer transferred.
-     */    
+     */
     public int listen() {
-	return 0;
+   
+      
+      mailCall.acquire();
+       
+try {
+    System.out.println("IN listen TRY");
+    listencalledfirst = true;
+    if(!Speakercalledfirst){condition.sleep();}
+    else{condition.wake();}
+    
+
+    //SET THE WAIT IN HERE
+    
+} finally {
+    Speakercalledfirst = false;
+    mailCall.release();
+} 
+	   return text;
     }
 }
+

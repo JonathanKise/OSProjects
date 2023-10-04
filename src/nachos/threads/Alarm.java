@@ -26,8 +26,18 @@ public class Alarm {
      * thread to yield, forcing a context switch if there is another thread
      * that should be run.
      */
+    boolean firstcall = true;
     public void timerInterrupt() {
-	KThread.currentThread().yield();
+        
+
+        
+if (time < Machine.timer().getTime() && eddy != null && firstcall){
+    firstcall = false;
+    boolean intStatus=Machine.interrupt().disable();
+    eddy.ready();
+    Machine.interrupt().restore(intStatus);
+}
+	//KThread.currentThread().yield();
     }
 
     /**
@@ -44,10 +54,23 @@ public class Alarm {
      *
      * @see	nachos.machine.Timer#getTime()
      */
+   static KThread eddy = null;
+    long time = 0;
+  
     public void waitUntil(long x) {
+     time = Machine.timer().getTime() + x;
+        eddy = KThread.currentThread();
+       
 	// for now, cheat just to get something working (busy waiting is bad)
 	long wakeTime = Machine.timer().getTime() + x;
-	while (wakeTime > Machine.timer().getTime())
-	    KThread.yield();
+    boolean intStatus=Machine.interrupt().disable();
+    KThread.sleep();
+    Machine.interrupt().restore(intStatus);
+      
+       // KThread.currentThread()
+	/*while (wakeTime > Machine.timer().getTime())
+    {
+    }*/
+	   // KThread.yield();
     }
 }

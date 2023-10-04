@@ -28,14 +28,17 @@ import nachos.machine.*;
  * </pre></blockquote>
  */
 public class KThread {
+ 
+
     /**
-     * Get the current thread.
      *
      * @return	the current thread.
      */
     public static KThread currentThread() {
 	Lib.assertTrue(currentThread != null);
-	return currentThread;
+	//return null;
+
+    return currentThread;
     }
     
     /**
@@ -45,6 +48,7 @@ public class KThread {
     public KThread() {
 	if (currentThread != null) {
 	    tcb = new TCB();
+     
 	}	    
 	else {
 	    readyQueue = ThreadedKernel.scheduler.newThreadQueue(false);
@@ -67,6 +71,7 @@ public class KThread {
     public KThread(Runnable target) {
 	this();
 	this.target = target;
+    //currentThread = this;
     }
 
     /**
@@ -136,6 +141,8 @@ public class KThread {
      * its target's <tt>run</tt> method).
      */
     public void fork() {
+      
+
 	Lib.assertTrue(status == statusNew);
 	Lib.assertTrue(target != null);
 	
@@ -156,6 +163,7 @@ public class KThread {
     }
 
     private void runThread() {
+    
 	begin();
 	target.run();
 	finish();
@@ -181,8 +189,29 @@ public class KThread {
      * destroyed automatically by the next thread to run, when it is safe to
      * delete this thread.
      */
+    
+   boolean ISfinish = false;
     public static void finish() {
-	Lib.debug(dbgThread, "Finishing thread: " + currentThread.toString());
+        KThread.currentThread().ISfinish = true;
+        
+        if(KThread.currentThread().ThreadDone == false){
+            KThread.currentThread().ThreadDone = true; 
+       if(KThread.currentThread().ed != KThread.currentThread() && KThread.currentThread().ed != null && KThread.currentThread() != null){
+  
+        boolean intStatus=Machine.interrupt().disable();
+        KThread.currentThread().ed.ready();
+        Machine.interrupt().restore(intStatus);
+          System.out.println(KThread.currentThread() + " NOT ZZZZZZZZZZZZZZZZZZZ");
+       }
+    }
+    
+    KThread.currentThread().ThreadDone = true; 
+ 
+
+   
+
+
+Lib.debug(dbgThread, "Finishing thread: " + currentThread.toString());
 	
 	Machine.interrupt().disable();
 
@@ -195,7 +224,12 @@ public class KThread {
 	currentThread.status = statusFinished;
 	
 	sleep();
-    }
+
+            
+        }
+        
+	
+
 
     /**
      * Relinquish the CPU if any other thread is ready to run. If so, put the
@@ -272,11 +306,31 @@ public class KThread {
      * call is not guaranteed to return. This thread must not be the current
      * thread.
      */
+ 
+        
+    boolean ThreadDone = false;
+     KThread ed = null;
     public void join() {
+         System.out.println(ISfinish + " SHOULD BE FALSE");
+         System.out.println(ed + " " + KThread.currentThread() + " SHOULD NOT EQUAL OR BE NULL");
+         if(!ISfinish){
+       if(ed != KThread.currentThread() && ed == null){
+        ed = KThread.currentThread();
+        boolean intStatus=Machine.interrupt().disable();
+        KThread.sleep();
+        System.out.println(KThread.currentThread() + " ZZZZZZZZZZZZZZZZZZZ");
+        Machine.interrupt().restore(intStatus); //Put current thread to sleep
+        }
+    }
+        
+        
+   
+    
 	Lib.debug(dbgThread, "Joining to thread: " + toString());
-
+     
 	Lib.assertTrue(this != currentThread);
-
+ 
+  
     }
 
     /**
@@ -390,6 +444,10 @@ public class KThread {
 	    for (int i=0; i<5; i++) {
 		System.out.println("*** thread " + which + " looped "
 				   + i + " times");
+          
+        
+                 
+             
 		currentThread.yield();
 	    }
 	}
@@ -404,6 +462,7 @@ public class KThread {
 	Lib.debug(dbgThread, "Enter KThread.selfTest");
 	
 	new KThread(new PingTest(1)).setName("forked thread").fork();
+     
 	new PingTest(0).run();
     }
 
